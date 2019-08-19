@@ -1,0 +1,102 @@
+@import "~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss";
+
+$scale_height: 13px;
+$genres_height: 15px;
+
+$width: 130px;
+
+$poster_height: ($width * 1.5);
+$height: ($width * 1.5) + $scale_height + $genres_height;
+
+.Movie {
+  position: relative;
+  width: $width;
+  height: $height;
+
+  .main {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+
+    background-size: 100%;
+    background-position: top;
+    background-repeat: no-repeat;
+
+    .scale {
+      height: $scale_height;
+      width: 100%;
+      background-color: $ms-color-themeLighter;
+
+      .rating {
+        height: 100%;
+        width: 0;
+        background-color: $ms-color-themeDark;
+      }
+    }
+
+    .genres {
+      margin: 0px;
+      padding: 0px;
+
+      list-style: none;
+      height: $genres_height;
+      display: flex;
+
+      .genres_li {
+        color: $ms-color-themeDark;
+        margin-right: 7px;
+        font-size: 11px;
+      }
+    }
+  }
+
+  .menu {
+    display: none;
+  }
+
+  .main:hover + .menu,
+  .menu:hover {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+    height: $poster_height;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+
+      background-color: $ms-color-themeDark;
+      opacity: 0.5;
+      z-index: 1;
+    }
+
+    .back__container {
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+
+      .button {
+        margin-bottom: 9px;
+        font-size:12px;
+      }
+    }
+  }
+
+  .Movie__not_found {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    background-color: $ms-color-themeDark;
+    z-index: 1;
+  }
+}

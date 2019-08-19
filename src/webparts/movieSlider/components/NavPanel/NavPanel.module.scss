@@ -1,0 +1,24 @@
+@import "~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss";
+
+.NavPanel {
+  margin-bottom: 5px;
+  
+  .radio {
+    display: none;
+  }
+
+  .label {
+    margin-right: 10px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .label:hover {
+    color: $ms-color-themePrimary;
+    cursor: pointer;
+  }
+
+  .radio:checked + .label {
+    color: $ms-color-themeDark;
+  }
+}

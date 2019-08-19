@@ -1,0 +1,27 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "movie-slider-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/movieSlider/MovieSliderWebPart.js",
+          "manifest": "./src/webparts/movieSlider/MovieSliderWebPart.manifest.json"
+        }
+      ]
+    },
+    "event-list-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/eventList/EventListWebPart.js",
+          "manifest": "./src/webparts/eventList/EventListWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "MovieSliderWebPartStrings": "lib/webparts/movieSlider/loc/{locale}.js",
+    "EventListWebPartStrings": "lib/webparts/eventList/loc/{locale}.js"
+  }
+}

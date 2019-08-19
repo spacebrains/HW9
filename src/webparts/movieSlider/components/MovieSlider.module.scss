@@ -1,0 +1,43 @@
+@import "~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss";
+
+$main_width: 300px;
+$main_height: $main_width * 1.5;
+$number_of_SubDiv: 3;
+
+.movieSlider {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .nav{
+    display: flex;
+  }
+
+  .slider {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .button {
+      width: 20px;
+      height: 20px;
+      background-color: $ms-color-white;
+      border: none;
+      padding: 10px;
+      margin: 5px;
+      font-size: 24px;
+      color: $ms-color-themeDark;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      cursor: pointer;
+    }
+    
+    .button:hover{
+      color: $ms-color-themePrimary;
+    }
+  }
+}
