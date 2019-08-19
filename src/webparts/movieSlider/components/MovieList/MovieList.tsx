@@ -1,5 +1,4 @@
 import * as React from 'react';
-import * as strings from 'MovieSliderWebPartStrings';
 import styles from './MovieList.module.scss';
 import { IMovie } from '../interfaces';
 import Movie from '../Movie/Movie';
