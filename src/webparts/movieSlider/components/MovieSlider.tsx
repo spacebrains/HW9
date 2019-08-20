@@ -1,22 +1,18 @@
 import * as React from 'react';
 import styles from './MovieSlider.module.scss';
-import { escape } from '@microsoft/sp-lodash-subset';
 import * as strings from 'MovieSliderWebPartStrings';
 import NavPanel from './NavPanel/NavPanel';
 import MovieList from './MovieList/MovieList';
-import {
-  IGenre, IResMovie, IMovie,
-  IMoviesByCategory, ICategory,
-  IWindow, Tkey, C
-} from './interfaces';
+import { IMovie, IMoviesByCategory, ICategory, IWindow, C } from './interfaces';
+import { localSetData, localGetData } from './requests/localStorage';
+import { loadMovies } from './requests/api';
 import WarningBlock from './WarningBlock/WarningBlock';
+//import { escape } from '@microsoft/sp-lodash-subset';
 
 
 export interface IMovieSliderProps {
   description: string;
 }
-
-
 
 interface IState {
   window: IWindow;
@@ -28,7 +24,7 @@ interface IState {
 
 
 export default class MovieSlider extends React.PureComponent<IMovieSliderProps, {}> {
-  private KEY = '57f28580932896b3e3c54cd033265039';
+
   private NUMBER_OF_MOVIES = 5;
 
   private allMovies: IMoviesByCategory = {
@@ -36,9 +32,8 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
     popular: [],
     upcoming: []
   };
-  private genres: IGenre[] = [];
-  private page: number = 1;
 
+  private page: number = 1;
 
   public state: IState = {
     window: C.warning,
@@ -58,106 +53,50 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
   public initalizationData = async (): Promise<void> => {
     console.log('initalizationData');
     try {
-      const currentGenres: IGenre[] = await this.localGetData(C.genres);
-      if (!currentGenres || currentGenres.length === 0) {
-        await this.loadGenres();
-      }
+      const { category } = this.state;
+      const { NUMBER_OF_MOVIES } = this;
 
-      let currentMovies: IMovie[] = await this.localGetData(C.now_playing);
-      if (!currentMovies || currentMovies.length < this.NUMBER_OF_MOVIES) {
-        currentMovies = await this.loadMovies(C.now_playing);
-      }
 
       this.allMovies = {
-        ...this.allMovies,
-        popular: await this.localGetData(C.popular),
-        upcoming: await this.localGetData(C.upcoming)
+        now_playing: await localGetData(C.now_playing),
+        popular: await localGetData(C.popular),
+        upcoming: await localGetData(C.upcoming)
       };
+      if (!this.allMovies[category] || this.allMovies[category].length < NUMBER_OF_MOVIES) {
+        await this.addMovies(category);
+      }
 
       const newState: IState = {
         ...this.state,
-        currentMovies: currentMovies.slice(0, this.NUMBER_OF_MOVIES),
+        currentMovies: this.allMovies[category].slice(0, NUMBER_OF_MOVIES),
         window: C.main,
         isLoading: false
       };
       this.setState(newState);
     }
     catch (error) {
-      this.errorHandler(error, 'invitalizationData');
+      this.errorHandler(error, 'initalizationData');
     }
   }
 
 
-
-  private loadMovies = async (category: ICategory = this.state.category): Promise<IMovie[]> => {
-    console.log('loadMovies');
+  private addMovies = async (category: ICategory = this.state.category): Promise<void> => {
+    console.log('addMovies');
     try {
-      this.setState({ ...this.state, isLoading: true });
-      const NUMBER_OF_RESULTS = 20;
+      this.setState({ isLoading: true });
 
-      let { allMovies } = this;
-      const page = (allMovies[category].length / NUMBER_OF_RESULTS) + 1;
+      const { allMovies } = this;
 
-      const URL = `https://api.themoviedb.org/3/movie/${category}?api_key=${this.KEY}&language=${strings.Lang}&page=${page}`;
-
-      const response = await fetch(URL);
-      const json = await response.json();
-
-      const results: IResMovie[] = json.results;
-      const movies = await this.parseMovies(results);
+      const movies: IMovie[] = await loadMovies(category, allMovies[category].length);
       allMovies[category] = [...allMovies[category], ...movies];
-      this.localSetData(category, allMovies[category]);
 
-      return movies;
+      localSetData(category, allMovies[category]);
     }
+
     catch (error) {
-      this.errorHandler(error, 'loadMovies');
-      return [];
+      this.errorHandler(error, 'addMovies');
     }
   }
-
-  private parseMovies = async (data: IResMovie[]): Promise<IMovie[]> => {
-    console.log('parseMovies');
-    try {
-      const genres: IGenre[] = this.genres.length > 0 ? this.genres : await this.loadGenres();
-
-      const movies: IMovie[] = data.map(i => {
-        const movie: IMovie = {
-          id: i.id,
-          title: i.title,
-          rating: i.vote_average,
-          poster: i.poster_path,
-          genres: i.genre_ids.map(gI => genres.find(g => g.id === gI))
-        };
-        return movie;
-      });
-      return movies;
-    }
-    catch (error) {
-      this.errorHandler(error, 'parseMovies');
-    }
-  }
-
-
-  private loadGenres = async (): Promise<IGenre[]> => {
-    console.log('loadGenres');
-    try {
-      const URL = `https://api.themoviedb.org/3/genre/movie/list?api_key=${this.KEY}&language=${strings.Lang}`;
-
-      const response = await fetch(URL);
-      const json = await response.json();
-      const { genres } = json;
-      this.genres = genres;
-
-      this.localSetData(C.genres, genres);
-      return genres;
-    }
-    catch (error) {
-      this.errorHandler(error, 'loadGenres');
-      return [];
-    }
-  }
-
 
 
   private shiftMovies = async (shift: -1 | 1): Promise<void> => {
@@ -165,7 +104,6 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
     try {
       const { category } = this.state;
       const { allMovies, NUMBER_OF_MOVIES } = this;
-
       const allMoviesLength = allMovies[category].length;
 
       let newPage = this.page + shift;
@@ -173,7 +111,7 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
         return null;
       }
       else if (newPage > allMoviesLength / NUMBER_OF_MOVIES) {
-        await this.loadMovies();
+        await this.addMovies();
       }
 
       this.page = newPage;
@@ -184,6 +122,7 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
       };
       this.setState(newState);
     }
+
     catch (error) {
       this.errorHandler(error, 'shiftMovies');
     }
@@ -193,7 +132,7 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
     try {
       const { allMovies, NUMBER_OF_MOVIES } = this;
       if (!allMovies[category] || allMovies[category].length < NUMBER_OF_MOVIES)
-        await this.loadMovies(category);
+        await this.addMovies(category);
 
       this.page = 1;
       const newState: IState = {
@@ -208,36 +147,6 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
       this.errorHandler(error, 'onChangeCategory');
     }
   }
-
-
-
-  private localSetData = (key: Tkey, data: IMovie[] | IGenre[]): void => {
-    console.log('localSetData', key);
-    const obj = {
-      data: data,
-      datetime: new Date()
-    };
-
-    localStorage.setItem(key, JSON.stringify(obj));
-  }
-
-  private localGetData = async <T extends []>(key: Tkey): Promise<T> => {
-    console.log('localGetData', key);
-    try {
-      const json = localStorage.getItem(key);
-      if (json) {
-        const { data, datetime } = await JSON.parse(json);
-        return +new Date() - +new Date(datetime) < 86400000 ? data : [];
-      }
-      else return [] as T;
-    }
-    catch (error) {
-      this.errorHandler(error, 'localGetData');
-      return [] as T;
-    }
-  }
-
-
 
   private errorHandler(error: Error, functionName: string = ""): void {
     console.error(functionName, error);

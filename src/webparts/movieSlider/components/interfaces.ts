@@ -31,6 +31,15 @@ export const C:IC={
   genres:'genres'
 };
 
+export interface ILocalData{
+  data:any[];
+  datetime:Date;
+}
+
+export interface ITimerObj{
+  key:Tkey;
+  timerId:string;
+}
 
 export interface IMoviesByCategory{
   now_playing:IMovie[];
