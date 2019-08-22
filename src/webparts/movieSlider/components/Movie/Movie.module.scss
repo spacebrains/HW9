@@ -79,14 +79,24 @@ $height: ($width * 1.5) + $scale_height + $genres_height;
       z-index: 1;
     }
 
+    .Spinner {
+      position: absolute;
+      z-index: 3;
+      height: 100%;
+      width: 100%;
+      top: 0;
+      right: 0;
+    }
+
     .back__container {
+      position: relative;
       z-index: 2;
       display: flex;
       flex-direction: column;
 
       .button {
         margin-bottom: 9px;
-        font-size:12px;
+        font-size: 12px;
       }
     }
   }

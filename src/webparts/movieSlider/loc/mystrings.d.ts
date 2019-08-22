@@ -1,12 +1,14 @@
 declare interface IMovieSliderWebPartStrings {
-  PropertyPaneDescription: string;
-  BasicGroupName: string;
-  DescriptionFieldLabel: string;
+  PropertyPaneUrl: string;
   Lang:string;
   Load:string;
   Now_playing:string;
   Popular:string;
   UpComing:string;
+  iWillGo:string;
+  iWillNotGo:string;
+  intresting:string;
+  notIntresting:string
 }
 
 declare module 'MovieSliderWebPartStrings' {

@@ -13,6 +13,11 @@ type genres='genres';
 
 export type Tkey= ICategory | genres;
 
+export interface IActs{
+  iWillGo:boolean;
+  intresting:boolean;
+}
+
 interface IC{
   warning:warning;
   main:main;
@@ -20,6 +25,8 @@ interface IC{
   popular:popular;
   upcoming:upcoming;
   genres:genres;
+  iWillGo:string;
+  intresting:string;
 }
 
 export const C:IC={
@@ -28,17 +35,30 @@ export const C:IC={
   now_playing:'now_playing',
   popular:'popular',
   upcoming:'upcoming',
-  genres:'genres'
+  genres:'genres',
+  iWillGo:'iWillGo',
+  intresting:'intresting'
 };
+
 
 export interface ILocalData{
   data:any[];
   datetime:Date;
 }
 
-export interface ITimerObj{
-  key:Tkey;
-  timerId:string;
+export interface IEvent{
+  Name:string;
+  Movie:string;
+  Category:string;
+  Datetime:string;
+  Actions:string;
+}
+
+
+export interface IListEvent{
+  Title:string;
+  MovieCategory:string;
+  MovieAction:string;
 }
 
 export interface IMoviesByCategory{
@@ -52,7 +72,22 @@ export interface IMovie {
   title:string;
   rating: number;
   poster: string;
-  genres: Array<IGenre>;
+  genres: Array<string>;
+}
+
+export interface IUser {
+  '@odata.context': string;
+  businessPhones: string[];
+  displayName: string;
+  givenName: string;
+  jobTitle?: any;
+  mail: string;
+  mobilePhone?: any;
+  officeLocation?: any;
+  preferredLanguage: string;
+  surname: string;
+  userPrincipalName: string;
+  id: string;
 }
 
 export interface IResMovie {
@@ -75,4 +110,47 @@ export interface IResMovie {
 export interface IGenre {
   id: number;
   name: string;
+}
+
+export interface IResCaml {
+  'odata.type': string;
+  'odata.id': string;
+  'odata.etag': string;
+  'odata.editLink': string;
+  FileSystemObjectType: number;
+  Id: number;
+  ServerRedirectedEmbedUri?: any;
+  ServerRedirectedEmbedUrl: string;
+  ContentTypeId: string;
+  Title: string;
+  ComplianceAssetId?: any;
+  Location?: any;
+  Geolocation?: any;
+  EventDate: string;
+  EndDate: string;
+  Description?: any;
+  fAllDayEvent: boolean;
+  fRecurrence: boolean;
+  ParticipantsPickerId?: any;
+  ParticipantsPickerStringId?: any;
+  Category?: any;
+  FreeBusy?: any;
+  Overbook?: any;
+  BannerUrl?: any;
+  MovieCategory: MovieCategory[];
+  MovieAction: string;
+  ID: number;
+  Modified: string;
+  Created: string;
+  AuthorId: number;
+  EditorId: number;
+  OData__UIVersionString: string;
+  Attachments: boolean;
+  GUID: string;
+}
+
+interface MovieCategory {
+  Label: string;
+  TermGuid: string;
+  WssId: number;
 }

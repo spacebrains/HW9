@@ -9,10 +9,11 @@ interface IMovieListProps {
   movies: IMovie[];
   isLoading?: boolean;
   numberOfMovies?: number;
+  userName?: string;
 }
 
 
-const MovieList: React.FC<IMovieListProps> = ({ movies, isLoading = false, numberOfMovies = 4 }: IMovieListProps) => {
+const MovieList: React.FC<IMovieListProps> = ({ movies, isLoading = true, numberOfMovies = 5, userName }: IMovieListProps) => {
   if (movies.length > numberOfMovies)
     movies = movies.slice(0, numberOfMovies).filter(g => g);
 
@@ -20,7 +21,7 @@ const MovieList: React.FC<IMovieListProps> = ({ movies, isLoading = false, numbe
     <ul className={styles.MovieList}>
       {movies.map(m =>
         <li className={styles.movie} key={m.id}>
-          <Movie movie={m} isLoading={isLoading} />
+          <Movie movie={m} isLoading={isLoading} userName={userName} />
         </li>
       )}
     </ul>

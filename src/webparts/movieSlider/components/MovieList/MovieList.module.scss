@@ -1,18 +1,18 @@
 @import "~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss";
 
 .MovieList{
-    display: flex;
-    list-style: none;
+  display: flex;
+  list-style: none;
 
-    margin:0;
-    padding:0;
+  margin:0;
+  padding:0;
 
-    .movie{
-        margin-right:12px;
-    }
+  .movie{
+      margin-right:12px;
+  }
 
-    :last-child{
-        margin-right:0;
-    }
+  :last-child{
+      margin-right:0;
+  }
 
 }

@@ -4,14 +4,17 @@ import * as strings from 'MovieSliderWebPartStrings';
 import NavPanel from './NavPanel/NavPanel';
 import MovieList from './MovieList/MovieList';
 import { IMovie, IMoviesByCategory, ICategory, IWindow, C } from './interfaces';
+import { MSGraphClientFactory } from '@microsoft/sp-http';
 import { localSetData, localGetData } from './requests/localStorage';
-import { loadMovies } from './requests/api';
+import { loadMovies } from './requests/MoviesApi';
+import { getUserName } from './requests/GraphApi';
 import WarningBlock from './WarningBlock/WarningBlock';
 //import { escape } from '@microsoft/sp-lodash-subset';
 
 
 export interface IMovieSliderProps {
-  description: string;
+  basicUrl: string;
+  MSGClientFactory: MSGraphClientFactory;
 }
 
 interface IState {
@@ -24,15 +27,13 @@ interface IState {
 
 
 export default class MovieSlider extends React.PureComponent<IMovieSliderProps, {}> {
-
   private NUMBER_OF_MOVIES = 5;
-
+  private userName: string;
   private allMovies: IMoviesByCategory = {
     now_playing: [],
     popular: [],
     upcoming: []
   };
-
   private page: number = 1;
 
   public state: IState = {
@@ -53,15 +54,19 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
   public initalizationData = async (): Promise<void> => {
     console.log('initalizationData');
     try {
-      const { category } = this.state;
+      const { category, } = this.state;
       const { NUMBER_OF_MOVIES } = this;
-
-
+      this.userName = await getUserName(this.props.MSGClientFactory);
+      //addListEvent();
+      //addOutlookEvent(this.props.MSGClientFactory,'wqe',new Date());
+      //checkMovie(this.props.basicUrl);
+      console.log(1111);
       this.allMovies = {
         now_playing: await localGetData(C.now_playing),
         popular: await localGetData(C.popular),
         upcoming: await localGetData(C.upcoming)
       };
+      console.log(222222);
       if (!this.allMovies[category] || this.allMovies[category].length < NUMBER_OF_MOVIES) {
         await this.addMovies(category);
       }
@@ -117,8 +122,8 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
       this.page = newPage;
       const newState: IState = {
         ...this.state,
-        currentMovies: allMovies[category].slice((newPage - 1) * NUMBER_OF_MOVIES, newPage * NUMBER_OF_MOVIES),
-        isLoading: false
+        isLoading: false,
+        currentMovies: allMovies[category].slice((newPage - 1) * NUMBER_OF_MOVIES, newPage * NUMBER_OF_MOVIES)
       };
       this.setState(newState);
     }
@@ -159,15 +164,15 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
     this.setState(newState);
   }
 
-  public componentWillUnmount(): void {
+  /*public componentWillUnmount(): void {
     console.log('componentWillUnmount');
-  }
+  }*/
 
 
 
   public render(): React.ReactElement<IMovieSliderProps> {
     console.log('render', this.state);
-    const { currentMovies, isLoading, window } = this.state;
+    const { isLoading, window, currentMovies } = this.state;
     if (window === C.main) {
       return (
         <main className={styles.movieSlider}>
@@ -177,9 +182,10 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
           <div className={styles.slider}>
             <button className={styles.button} onClick={() => this.shiftMovies(-1)}>{'<'}</button>
             <MovieList
-              movies={currentMovies}
               numberOfMovies={this.NUMBER_OF_MOVIES}
               isLoading={isLoading}
+              movies={currentMovies}
+              userName={this.userName}
             />
             <button className={styles.button} onClick={() => this.shiftMovies(1)}>{'>'}</button>
           </div>

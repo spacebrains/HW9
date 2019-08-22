@@ -3,9 +3,19 @@
   "solution": {
     "name": "hw-9-client-side-solution",
     "id": "011e2b3f-dc0d-4eeb-b828-7ae177853801",
-    "version": "1.0.0.0",
+    "version": "1.0.0.3",
     "includeClientSideAssets": true,
-    "isDomainIsolated": false
+    "isDomainIsolated": false,
+    "webApiPermissionRequests": [
+      {
+        "resource": "Microsoft Graph",
+        "scope": "User.ReadBasic.All"
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Calendars.ReadWrite"
+      }
+    ]
   },
   "paths": {
     "zippedPackage": "solution/hw-9.sppkg"
