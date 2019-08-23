@@ -25,7 +25,7 @@ interface IState {
 
 export default class MovieSlider extends React.PureComponent<IMovieSliderProps, {}> {
   private NUMBER_OF_MOVIES = 5;
-  private userName: string;
+  private user: string;
   private allMovies: IMoviesByCategory = {
     now_playing: [],
     popular: [],
@@ -50,7 +50,7 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
     try {
       const { category, } = this.state;
       const { NUMBER_OF_MOVIES } = this;
-      this.userName = await getUserName(this.props.MSGClientFactory);
+      this.user = await getUserName(this.props.MSGClientFactory);
       this.allMovies = {
         now_playing: await getLocalData(C.now_playing),
         popular: await getLocalData(C.popular),
@@ -166,7 +166,7 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
               numberOfMovies={this.NUMBER_OF_MOVIES}
               isLoading={isLoading}
               movies={currentMovies}
-              userName={this.userName}
+              userName={this.user}
               MSGClientFactory={this.props.MSGClientFactory}
             />
             <button className={styles.button} onClick={() => this.shiftMovies(1)}>{'>'}</button>

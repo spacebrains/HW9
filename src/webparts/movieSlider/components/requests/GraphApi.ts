@@ -8,7 +8,7 @@ export const addOutlookEvent = async (MSGClientFactory: MSGraphClientFactory, mo
   const datetime = new Date();
 
   const event = {
-    subject: strings.AtThisTime + (action==='' ? strings.AbsolutelyNothing : action),
+    subject: strings.AtThisTime + (action === '' ? strings.AbsolutelyNothing : action),
     body: {
       contentType: "HTML",
       content: movieName

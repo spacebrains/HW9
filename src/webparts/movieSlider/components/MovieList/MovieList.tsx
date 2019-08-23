@@ -11,7 +11,7 @@ interface IMovieListProps {
   MSGClientFactory: MSGraphClientFactory;
   isLoading?: boolean;
   numberOfMovies?: number;
-  userName?: string;
+  userName: string;
 }
 
 
@@ -23,7 +23,7 @@ const MovieList: React.FC<IMovieListProps> = ({ movies, MSGClientFactory, isLoad
     <ul className={styles.MovieList}>
       {movies.map(m =>
         <li className={styles.movie} key={m.id}>
-          <Movie movie={m} isLoading={isLoading} userName={userName} MSGClientFactory={MSGClientFactory} />
+          <Movie movie={m} isLoading={isLoading} userName={userName} MSGClientFactory={MSGClientFactory}/>
         </li>
       )}
     </ul>

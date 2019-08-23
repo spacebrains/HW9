@@ -18,7 +18,7 @@ interface IMovieProps {
 	MSGClientFactory: MSGraphClientFactory;
 	isLoading?: boolean;
 	numberOfGenres?: number;
-	userName?: string;
+	userName: string;
 }
 
 interface IState {
@@ -90,12 +90,12 @@ export default class Movie extends React.PureComponent<IMovieProps, {}>{
 
 			if (acts.iWillGo || acts.intresting) {
 				await setLocalTempEvent(tempEvent);
-				await deleteListEvent(title);
-				await addListEvent(title, genres, MovieAction);
+				await deleteListEvent(title,this.props.userName);
+				await addListEvent(title, genres, MovieAction, this.props.userName);
 			}
 			else {
 				await setLocalTempEvent(tempEvent);
-				await deleteListEvent(title);
+				await deleteListEvent(title,this.props.userName);
 			}
 			addOutlookEvent(this.props.MSGClientFactory, title, MovieAction);
 			Store.broadcast();
@@ -109,7 +109,7 @@ export default class Movie extends React.PureComponent<IMovieProps, {}>{
 
 	private checkMovieActs = async (baseUrl: string = 'https://mastond.sharepoint.com', calendarName: string = 'MovieCalendar'): Promise<IActs> => {
 		const { title } = this.state.movie;
-		const response: IResCaml = await getSpListEvent(title);
+		const response: IResCaml = await getSpListEvent(title,this.props.userName);
 		if (response) {
 			const iWillGo: boolean = response.MovieAction.includes(C.iWillGo);
 			const intresting: boolean = response.MovieAction.includes(C.intresting);

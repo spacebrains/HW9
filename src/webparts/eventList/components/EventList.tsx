@@ -48,7 +48,7 @@ export default class EventList extends React.Component<IEventListProps, {}> {
       let events: IEvent[] = [];
 
       if (calendarEvents && tempEvents) {
-        events = calendarEvents.filter(e => !tempEvents.some(te => te.Movie == e.Movie));
+        events = calendarEvents.filter(e => !tempEvents.some(te => (te.Movie == e.Movie) && (te.Name===e.Name)));
         events = [...events, ...tempEvents];
       }
       else if (!calendarEvents && tempEvents) {
