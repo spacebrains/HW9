@@ -9,6 +9,8 @@ define([], function() {
     "iWillGo":"I will go",
     "iWillNotGo":"I will not go",
     "intresting":"intresting",
-    "notIntresting":"not intresting"
+    "notIntresting":"not intresting",
+    "AtThisTime":"At this time, I realized the following: ",
+    "AbsolutelyNothing":"Absolutely NOTHING"
   };
 });

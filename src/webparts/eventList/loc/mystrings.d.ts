@@ -4,6 +4,7 @@ declare interface IEventListWebPartStrings {
   DescriptionFieldLabel: string;
 
   Load:string;
+  CalendarIsEmpty:string;
 
 }
 

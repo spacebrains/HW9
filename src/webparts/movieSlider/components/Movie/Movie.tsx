@@ -2,18 +2,20 @@ import * as React from 'react';
 import * as strings from 'MovieSliderWebPartStrings';
 import styles from './Movie.module.scss';
 import WarningBlock from '../WarningBlock/WarningBlock';
-import { checkMovieActs, addListEvent, deleteListEvent } from '../requests/RestApi';
-import { localGetTempActs, localSetTempEvent } from '../requests/localStorage';
+import { getSpListEvent, addListEvent, deleteListEvent, IResCaml } from '../requests/SpRestApi';
+import { setLocalTempEvent, getLocalTempEvents } from '../requests/localStorage';
 import { addOutlookEvent } from '../requests/GraphApi';
+import { MSGraphClientFactory } from '@microsoft/sp-http';
 import { PrimaryButton } from 'office-ui-fabric-react';
 import Spinner from '../Spinner/Spinner';
-import { IMovie, IActs, IWindow, IEvent, C } from '../interfaces';
+import { IMovie, IActs, IWindow, IEvent } from '../interfaces';
+import C from '../constants';
 import Store from '../../../Observer/Observer';
-
 
 
 interface IMovieProps {
 	movie: IMovie;
+	MSGClientFactory: MSGraphClientFactory;
 	isLoading?: boolean;
 	numberOfGenres?: number;
 	userName?: string;
@@ -47,29 +49,16 @@ export default class Movie extends React.PureComponent<IMovieProps, {}>{
 	};
 
 	public componentDidMount(): void {
-		console.log('m componentDidMount');
 		this.setState({ ...this.state, isLoading: false, isLoadingActs: true, window: C.main });
 		this.getActs();
 	}
 
-	/*public componentDidUpdate(prevState): void {
-		console.log('m componentDidUpdate');
-		if (this.state.movie !== prevState.movie) {
-			this.getActs();
-		}
-		else this.setState({ ...this.state, isLoading: false });
-	}*/
-
 	private getActs = async (): Promise<void> => {
-		console.log('m checkActs');
 		try {
-			let acts: IActs = await localGetTempActs(this.state.movie.title);
-			console.log(acts);
+			let acts: IActs = await this.getLocalTempActs(this.state.movie.title);
 			if (!acts) {
-				acts = await checkMovieActs(this.state.movie.title);
-				console.log(acts);
+				acts = await this.checkMovieActs();
 			}
-
 			const newState: IState = {
 				...this.state,
 				acts: acts,
@@ -79,43 +68,75 @@ export default class Movie extends React.PureComponent<IMovieProps, {}>{
 			};
 			this.setState(newState);
 		}
+
 		catch (error) {
 			this.errorHandler(error, 'getActs');
 		}
 	}
 
 	private onClickButton = async (acts: IActs) => {
-		console.log('m onClickButton');
 		try {
 			const { title, genres } = this.state.movie;
-
-			const iWillGo = acts.iWillGo ? `${C.iWillGo}; ` : '';
-			const intresting = acts.intresting ? `${C.intresting}; ` : '';
-			const MovieAction = iWillGo + intresting;
+			const MovieAction = (acts.iWillGo ? `${C.iWillGo} ` : '') + (acts.intresting ? `${C.intresting} ` : '');
+			const date = new Date();
 
 			const tempEvent: IEvent = {
 				Name: this.props.userName || '',
 				Movie: title,
 				Category: genres.join('; '),
-				Datetime: `${new Date()}`,
+				Datetime: `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()} ${date.getHours()}h:${date.getMinutes()}m`,
 				Actions: MovieAction
 			};
 
-			await localSetTempEvent(tempEvent);
 			if (acts.iWillGo || acts.intresting) {
+				await setLocalTempEvent(tempEvent);
 				await deleteListEvent(title);
-				await addListEvent(title, genres, acts);
+				await addListEvent(title, genres, MovieAction);
 			}
 			else {
+				await setLocalTempEvent(tempEvent);
 				await deleteListEvent(title);
 			}
+			addOutlookEvent(this.props.MSGClientFactory, title, MovieAction);
 			Store.broadcast();
-
 			this.setState({ ...this.state, acts: acts });
-
 		}
+
 		catch (error) {
 			this.errorHandler(error, 'onClickButton');
+		}
+	}
+
+	private checkMovieActs = async (baseUrl: string = 'https://mastond.sharepoint.com', calendarName: string = 'MovieCalendar'): Promise<IActs> => {
+		const { title } = this.state.movie;
+		const response: IResCaml = await getSpListEvent(title);
+		if (response) {
+			const iWillGo: boolean = response.MovieAction.includes(C.iWillGo);
+			const intresting: boolean = response.MovieAction.includes(C.intresting);
+
+			const acts: IActs = {
+				iWillGo: iWillGo,
+				intresting: intresting
+			};
+			return acts;
+		}
+		else return { iWillGo: false, intresting: false };
+	}
+
+	private getLocalTempActs = async (movieName: string, key: string = 'tempData'): Promise<IActs> => {
+		const events: IEvent[] = await getLocalTempEvents(key);
+		if (events) {
+			const event = events.find(e => e.Movie === movieName);
+			if (event) {
+				const iWillGo: boolean = event.Actions.includes(C.iWillGo);
+				const intresting: boolean = event.Actions.includes(C.intresting);
+
+				const acts: IActs = {
+					iWillGo: iWillGo,
+					intresting: intresting
+				};
+				return acts;
+			}
 		}
 	}
 
@@ -131,8 +152,6 @@ export default class Movie extends React.PureComponent<IMovieProps, {}>{
 	}
 
 	public render(): React.ReactElement<IMovieProps> {
-		console.log('m render', this.state);
-
 		const { numberOfGenres, isLoading, isLoadingActs, message, window, acts } = this.state;
 		if (window === C.main) {
 			const { poster, rating } = this.state.movie;

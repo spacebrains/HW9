@@ -1,17 +1,19 @@
 import * as React from 'react';
-import styles from './EventList.module.scss';
 import * as strings from 'EventListWebPartStrings';
-import { IEventListProps } from './IEventListProps';
-import { escape } from '@microsoft/sp-lodash-subset';
 import { DetailsList } from "office-ui-fabric-react";
-import { loadEvents } from './requests/searchApi';
-import { getLocalTempEventsWithTime, ILocalData } from './requests/localStorage';
+import { getEventsUsingSearchApi } from './requests/searchApi';
+import { getLocalTempEventsWithTime, ILocalEventData } from './requests/localStorage';
+import { IWindow, IEvent } from './interfaces';
+import C from './constants';
 import Store from '../../Observer/Observer';
-import { IWindow, IEvent, C } from './interfaces';
 import Spinner from './Spinner/Spinner';
 import WarningBlock from './WarningBlock/WarningBlock';
 
 
+
+export interface IEventListProps {
+  description: string;
+}
 
 
 interface IState {
@@ -23,7 +25,7 @@ interface IState {
 
 
 export default class EventList extends React.Component<IEventListProps, {}> {
-  private timerId;
+  private timerId: number;
 
   public state: IState = {
     window: C.warning,
@@ -34,61 +36,73 @@ export default class EventList extends React.Component<IEventListProps, {}> {
 
 
   public componentDidMount(): void {
-    console.log('e componentDidMount');
     Store.subscribe(this.getEvents);
     this.getEvents();
   }
 
+
   public getEvents = async (): Promise<void> => {
-    console.log('e getEvents');
     try {
-      const calendarEvents = await loadEvents();
-      if (calendarEvents) {
-        const tempEvents = await this.getTempEvents();
-        let events: IEvent[];
-        if (tempEvents) {
-          events = calendarEvents.filter(e => tempEvents.every(te => te.Movie !== e.Movie));
-        }
-        else {
-          events = calendarEvents;
-        }
-        console.log(calendarEvents, tempEvents);
+      const calendarEvents = await getEventsUsingSearchApi();
+      const tempEvents = await this.getTempEvents();
+      let events: IEvent[] = [];
 
+      if (calendarEvents && tempEvents) {
+        events = calendarEvents.filter(e => !tempEvents.some(te => te.Movie == e.Movie));
+        events = [...events, ...tempEvents];
+      }
+      else if (!calendarEvents && tempEvents) {
+        events = tempEvents;
+      }
+      else if (calendarEvents && !tempEvents) {
+        events = calendarEvents;
+      }
 
-        console.log(events);
+      events = events.filter(e => e.Actions !== '');
+      if (events.length !== 0) {
         const newState: IState = {
           ...this.state,
-          items: [...events, ...tempEvents],
+          items: events.filter(e => e.Actions !== ''),
           window: C.main,
+          isLoading: false
+        };
+        this.setState(newState);
+      }
+      else {
+        const newState: IState = {
+          ...this.state,
+          window: C.warning,
+          message: strings.CalendarIsEmpty,
           isLoading: false
         };
         this.setState(newState);
       }
     }
     catch (error) {
-      this.errorHandler(error, 'e getEvents');
+      this.errorHandler(error, 'getEvents');
     }
   }
 
+
   private getTempEvents = async (): Promise<IEvent[]> => {
-    console.log('e getTempEvents');
     try {
-      const tempEventsData: ILocalData = await getLocalTempEventsWithTime();
-      if (tempEventsData.data) {
-        if (this.timerId) clearTimeout(this.timerId);
-        console.log("datetime", +tempEventsData.datetime);
-        this.timerId = setTimeout(this.getEvents, +tempEventsData.datetime);
+      const tempEventsData: ILocalEventData = await getLocalTempEventsWithTime();
+      if (tempEventsData) {
+        if (this.timerId) {
+          clearTimeout(this.timerId);
+          this.timerId = null;
+        }
+
+        this.timerId = setTimeout(this.getEvents, tempEventsData.timerTime);
         return tempEventsData.data;
       }
-      else return [];
     }
     catch (error) {
-      this.errorHandler(error, 'e getEvents');
+      this.errorHandler(error, 'getTempEvents');
     }
   }
 
   private errorHandler(error: Error, functionName: string = ""): void {
-    console.log('e errorHandler');
     console.error(functionName, error);
     const newState: IState = {
       ...this.state,
@@ -106,7 +120,6 @@ export default class EventList extends React.Component<IEventListProps, {}> {
 
 
   public render(): React.ReactElement<IEventListProps> {
-    console.log('e render');
     const { items, message, window, isLoading } = this.state;
     if (window === C.main) {
       return (

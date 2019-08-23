@@ -1,21 +1,22 @@
-import { IEvent } from '../interfaces';
+export interface ILocalData {
+    data: any[];
+    datetime: number;
+}
+
+export interface ILocalEventData {
+    data: any[];
+    timerTime: number;
+}
 
 
-export interface ILocalData{
-    data:any[];
-    datetime:Date;
-  }
-
-
-export const getLocalTempEventsWithTime = async (key: string = 'tempData'): Promise<ILocalData> => {
-    console.log('localGetTempEvents:_ ee');
+export const getLocalTempEventsWithTime = async (key: string = 'tempData'): Promise<ILocalEventData> => {
     const TIMER_TIME = 900000;
     const json = localStorage.getItem(key);
     if (json) {
-        const data = await JSON.parse(json) as ILocalData;
-        if (+new Date() - +new Date(data.datetime) < TIMER_TIME) {
-            return data;
+        const localData = await JSON.parse(json) as ILocalData;
+        if (+new Date() - +new Date(localData.datetime) < TIMER_TIME) {
+
+            return { data: localData.data, timerTime: ((localData.datetime + TIMER_TIME) - (+ new Date())) };
         }
     }
-    return undefined;
 };

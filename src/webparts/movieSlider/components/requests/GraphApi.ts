@@ -1,15 +1,17 @@
 import { MSGraphClientFactory } from '@microsoft/sp-http';
-import * as MicrosoftGraph from '@microsoft/microsoft-graph-types';
-import {IUser} from '../interfaces';
+import { IResMSGraphUser } from './responseInterfaces';
+import * as strings from 'MovieSliderWebPartStrings';
 
-export const addOutlookEvent = async (MSGClientFactory: MSGraphClientFactory, CalendarName: string = 'Calendar', movieName: string = 'test', action: string): Promise<void> => {
-  console.log('addOutlookEvent');
+export interface IResMSGraphUser extends IResMSGraphUser { }
+
+export const addOutlookEvent = async (MSGClientFactory: MSGraphClientFactory, movieName: string = 'test', action: string, CalendarName: string = 'Calendar', ): Promise<void> => {
   const datetime = new Date();
+
   const event = {
-    subject: movieName,
+    subject: strings.AtThisTime + (action==='' ? strings.AbsolutelyNothing : action),
     body: {
       contentType: "HTML",
-      content: action
+      content: movieName
     },
     start: {
       dateTime: datetime,
@@ -22,15 +24,13 @@ export const addOutlookEvent = async (MSGClientFactory: MSGraphClientFactory, Ca
   };
 
   const client = await MSGClientFactory.getClient();
-  const response = client.api(`/me/calendars/${CalendarName}/events`).post(event);
-
-  console.log(response);
+  await client.api(`/me/calendars/${CalendarName}/events`).post(event);
 };
 
 
 export const getUserName = async (MSGClientFactory: MSGraphClientFactory): Promise<string> => {
   const client = await MSGClientFactory.getClient();
-  const user:IUser = await client.api('/me').get();
-  
+  const user: IResMSGraphUser = await client.api('/me').get();
+
   return user.displayName;
 };

@@ -3,6 +3,7 @@ define([], function() {
     "PropertyPaneDescription": "Description",
     "BasicGroupName": "Group Name",
     "DescriptionFieldLabel": "Description Field",
-    "Load":"Please, wait"
+    "Load":"Please, wait",
+    "CalendarIsEmpty":'Calendar is empty'
   };
 });

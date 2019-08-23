@@ -11,7 +11,7 @@ class Store {
 
     public broadcast() {
         if (this.observers.length === 0) {
-            console.log("No subsricer in Array");
+            //console.log("No subsricer in Array");
         } else {
             this.observers.forEach(subscriber => subscriber());
         }

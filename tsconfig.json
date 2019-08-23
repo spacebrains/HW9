@@ -30,7 +30,7 @@
     ]
   },
   "include": [
-    "src/**/*.ts", "src/webparts/movieSlider/components/requests/RestApi.tsx"
+    "src/**/*.ts", "src/webparts/movieSlider/components/requests/SpRestApi.tsx"
   ],
   "exclude": [
     "node_modules",

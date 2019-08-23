@@ -1,18 +1,21 @@
-import { IGenre, IMovie, Tkey, ILocalData, IEvent, IActs, C } from '../interfaces';
+import { IGenre, IMovie, Tkey, IEvent } from '../interfaces';
 
 
-export const localSetData = (key: Tkey, data: IMovie[] | IGenre[]): void => {
-    console.log('localSetData', key);
+export interface ILocalData {
+    data: any[];
+    datetime: number;
+}
+
+export const setLocalData = (key: Tkey, data: IMovie[] | IGenre[]): void => {
     const obj = {
         data: data,
-        datetime: new Date()
+        datetime: +new Date()
     };
 
     localStorage.setItem(key, JSON.stringify(obj));
 };
 
-export const localGetData = async <T extends any[]>(key: Tkey): Promise<T> => {
-    console.log('localGetData:_', key);
+export const getLocalData = async <T extends any[]>(key: Tkey): Promise<T> => {
     const TIMER_TIME = 86400000;
     const json = localStorage.getItem(key);
     if (json) {
@@ -26,54 +29,36 @@ export const localGetData = async <T extends any[]>(key: Tkey): Promise<T> => {
 
 
 
-
-
-
-export const localGetTempEvents = async (key: string = 'tempData'): Promise<IEvent[]> => {
-    console.log('localGetTempEvents:_');
+export const getLocalTempEvents = async (key: string = 'tempData'): Promise<IEvent[]> => {
     const TIMER_TIME = 900000;
+
     const json = localStorage.getItem(key);
-    console.log('gettemp', json);
     if (json) {
         const dataObj = await JSON.parse(json) as ILocalData;
         const { data, datetime } = dataObj;
-        console.log(+new Date() - +new Date(datetime) < TIMER_TIME, 'timerboolean');
         if (+new Date() - +new Date(datetime) < TIMER_TIME) {
-            console.log('localDataFlagf',dataObj, data);
             return data;
         }
     }
     return undefined;
 };
 
-
-export const localGetTempActs = async (movieName: string, key: string = 'tempData'): Promise<IActs> => {
-    console.log('localGetTempEvent:_');
-    const events: IEvent[] = await localGetTempEvents(key);
-    if (events) {
-        const event = events.find(e => e.Movie === movieName);
-        if (event) {
-            const iWillGo: boolean = event.Actions.includes(C.iWillGo);
-            const intresting: boolean = event.Actions.includes(C.intresting);
-
-            const acts: IActs = {
-                iWillGo: iWillGo,
-                intresting: intresting
-            };
-
-            return acts;
-        }
+export const deleteLocalTempEvent = async (event: IEvent, key: string = 'tempData') => {
+    let tempEvents: IEvent[] = await getLocalTempEvents(key);
+    if (tempEvents) {
+        tempEvents = tempEvents.filter(e => e.Movie !== event.Movie);
+        const obj = {
+            data: tempEvents,
+            datetime: +new Date()
+        };
+        localStorage.setItem(key, JSON.stringify(obj));
     }
 };
 
-//export const localDeleteteTempEvent=async()
 
-
-export const localSetTempEvent = async (event: IEvent, key: string = 'tempData'): Promise<void> => {
-    console.log('localSetTempData');
+export const setLocalTempEvent = async (event: IEvent, key: string = 'tempData'): Promise<void> => {
     let events: IEvent[];
-    let tempEvents: IEvent[] = await localGetTempEvents(key);
-    console.log('localData', tempEvents);
+    let tempEvents: IEvent[] = await getLocalTempEvents(key);
 
     if (tempEvents) {
         tempEvents = tempEvents.filter(e => e.Movie !== event.Movie);
@@ -82,11 +67,9 @@ export const localSetTempEvent = async (event: IEvent, key: string = 'tempData')
     else {
         events = [event];
     }
-    console.log(events, tempEvents);
     const obj = {
         data: events,
-        datetime: new Date()
+        datetime: +new Date()
     };
-
     localStorage.setItem(key, JSON.stringify(obj));
 };

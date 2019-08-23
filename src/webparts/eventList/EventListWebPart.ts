@@ -9,7 +9,7 @@ import {
 
 import * as strings from 'EventListWebPartStrings';
 import EventList from './components/EventList';
-import { IEventListProps } from './components/IEventListProps';
+import { IEventListProps } from './components/EventList';
 
 export interface IEventListWebPartProps {
   description: string;

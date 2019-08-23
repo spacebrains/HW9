@@ -8,7 +8,9 @@ declare interface IMovieSliderWebPartStrings {
   iWillGo:string;
   iWillNotGo:string;
   intresting:string;
-  notIntresting:string
+  notIntresting:string;
+  AtThisTime:string;
+  AbsolutelyNothing:string;
 }
 
 declare module 'MovieSliderWebPartStrings' {

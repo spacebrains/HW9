@@ -1,9 +1,8 @@
 import * as React from 'react';
 import * as strings from 'MovieSliderWebPartStrings';
 import styles from './NavPanel.module.scss';
-import { ICategory, C } from '../interfaces';
-import { string } from 'prop-types';
-
+import { ICategory } from '../interfaces';
+import C from '../constants';
 
 
 interface INavPanelProps {

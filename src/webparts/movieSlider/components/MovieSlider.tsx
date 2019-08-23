@@ -3,14 +3,13 @@ import styles from './MovieSlider.module.scss';
 import * as strings from 'MovieSliderWebPartStrings';
 import NavPanel from './NavPanel/NavPanel';
 import MovieList from './MovieList/MovieList';
-import { IMovie, IMoviesByCategory, ICategory, IWindow, C } from './interfaces';
+import { IMovie, IMoviesByCategory, ICategory, IWindow } from './interfaces';
+import C from './constants';
 import { MSGraphClientFactory } from '@microsoft/sp-http';
-import { localSetData, localGetData } from './requests/localStorage';
-import { loadMovies } from './requests/MoviesApi';
+import { setLocalData, getLocalData } from './requests/localStorage';
+import { loadMoviesFromMDB } from './requests/MoviesApi';
 import { getUserName } from './requests/GraphApi';
 import WarningBlock from './WarningBlock/WarningBlock';
-//import { escape } from '@microsoft/sp-lodash-subset';
-
 
 export interface IMovieSliderProps {
   basicUrl: string;
@@ -24,7 +23,6 @@ interface IState {
   category: ICategory;
   currentMovies: IMovie[];
 }
-
 
 export default class MovieSlider extends React.PureComponent<IMovieSliderProps, {}> {
   private NUMBER_OF_MOVIES = 5;
@@ -45,28 +43,20 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
   };
 
 
-
   public componentDidMount(): void {
-    console.log('componentDidMount');
     this.initalizationData();
   }
 
   public initalizationData = async (): Promise<void> => {
-    console.log('initalizationData');
     try {
       const { category, } = this.state;
       const { NUMBER_OF_MOVIES } = this;
       this.userName = await getUserName(this.props.MSGClientFactory);
-      //addListEvent();
-      //addOutlookEvent(this.props.MSGClientFactory,'wqe',new Date());
-      //checkMovie(this.props.basicUrl);
-      console.log(1111);
       this.allMovies = {
-        now_playing: await localGetData(C.now_playing),
-        popular: await localGetData(C.popular),
-        upcoming: await localGetData(C.upcoming)
+        now_playing: await getLocalData(C.now_playing),
+        popular: await getLocalData(C.popular),
+        upcoming: await getLocalData(C.upcoming)
       };
-      console.log(222222);
       if (!this.allMovies[category] || this.allMovies[category].length < NUMBER_OF_MOVIES) {
         await this.addMovies(category);
       }
@@ -86,16 +76,13 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
 
 
   private addMovies = async (category: ICategory = this.state.category): Promise<void> => {
-    console.log('addMovies');
     try {
       this.setState({ isLoading: true });
-
       const { allMovies } = this;
 
-      const movies: IMovie[] = await loadMovies(category, allMovies[category].length);
+      const movies: IMovie[] = await loadMoviesFromMDB(category, allMovies[category].length);
       allMovies[category] = [...allMovies[category], ...movies];
-
-      localSetData(category, allMovies[category]);
+      setLocalData(category, allMovies[category]);
     }
 
     catch (error) {
@@ -105,7 +92,6 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
 
 
   private shiftMovies = async (shift: -1 | 1): Promise<void> => {
-    console.log('shiftMovies');
     try {
       const { category } = this.state;
       const { allMovies, NUMBER_OF_MOVIES } = this;
@@ -152,6 +138,8 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
       this.errorHandler(error, 'onChangeCategory');
     }
   }
+  
+
 
   private errorHandler(error: Error, functionName: string = ""): void {
     console.error(functionName, error);
@@ -164,14 +152,8 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
     this.setState(newState);
   }
 
-  /*public componentWillUnmount(): void {
-    console.log('componentWillUnmount');
-  }*/
-
-
 
   public render(): React.ReactElement<IMovieSliderProps> {
-    console.log('render', this.state);
     const { isLoading, window, currentMovies } = this.state;
     if (window === C.main) {
       return (
@@ -186,6 +168,7 @@ export default class MovieSlider extends React.PureComponent<IMovieSliderProps, 
               isLoading={isLoading}
               movies={currentMovies}
               userName={this.userName}
+              MSGClientFactory={this.props.MSGClientFactory}
             />
             <button className={styles.button} onClick={() => this.shiftMovies(1)}>{'>'}</button>
           </div>
