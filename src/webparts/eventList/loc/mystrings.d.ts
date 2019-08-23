@@ -1,8 +1,4 @@
 declare interface IEventListWebPartStrings {
-  PropertyPaneDescription: string;
-  BasicGroupName: string;
-  DescriptionFieldLabel: string;
-
   Load:string;
   CalendarIsEmpty:string;
 

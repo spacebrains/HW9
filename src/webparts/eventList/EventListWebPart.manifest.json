@@ -19,7 +19,7 @@
     "group": { "default": "Other" },
     "title": { "default": "EventList" },
     "description": { "default": "HW9 for WM Reply" },
-    "officeFabricIconFontName": "Page",
+    "officeFabricIconFontName": "Calendar",
     "properties": {
       "description": "EventList"
     }

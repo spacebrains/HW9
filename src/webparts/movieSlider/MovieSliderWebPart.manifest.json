@@ -19,7 +19,7 @@
     "group": { "default": "Other" },
     "title": { "default": "MovieSlider" },
     "description": { "default": "Task for WM Reply" },
-    "officeFabricIconFontName": "Page",
+    "officeFabricIconFontName": "StackIndicator",
     "properties": {
       "description": "MovieSlider"
     }

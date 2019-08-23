@@ -12,7 +12,6 @@ import { getUserName } from './requests/GraphApi';
 import WarningBlock from './WarningBlock/WarningBlock';
 
 export interface IMovieSliderProps {
-  basicUrl: string;
   MSGClientFactory: MSGraphClientFactory;
 }
 

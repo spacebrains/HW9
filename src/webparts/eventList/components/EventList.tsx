@@ -12,7 +12,6 @@ import WarningBlock from './WarningBlock/WarningBlock';
 
 
 export interface IEventListProps {
-  description: string;
 }
 
 
@@ -42,6 +41,7 @@ export default class EventList extends React.Component<IEventListProps, {}> {
 
 
   public getEvents = async (): Promise<void> => {
+    this.setState({...this.state, isLoading:true});
     try {
       const calendarEvents = await getEventsUsingSearchApi();
       const tempEvents = await this.getTempEvents();

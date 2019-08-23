@@ -2,29 +2,20 @@ import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
-import {
-  IPropertyPaneConfiguration,
-  PropertyPaneTextField
-} from '@microsoft/sp-property-pane';
-
-import * as strings from 'EventListWebPartStrings';
 import EventList from './components/EventList';
 import { IEventListProps } from './components/EventList';
 
 export interface IEventListWebPartProps {
-  description: string;
+  calendarId: string;
+  connectToggle: boolean;
 }
 
 export default class EventListWebPart extends BaseClientSideWebPart<IEventListWebPartProps> {
 
   public render(): void {
-    const element: React.ReactElement<IEventListProps > = React.createElement(
-      EventList,
-      {
-        description: this.properties.description
-      }
+    const element: React.ReactElement<IEventListProps> = React.createElement(
+      EventList
     );
-
     ReactDom.render(element, this.domElement);
   }
 
@@ -34,27 +25,5 @@ export default class EventListWebPart extends BaseClientSideWebPart<IEventListWe
 
   protected get dataVersion(): Version {
     return Version.parse('1.0');
-  }
-
-  protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
-    return {
-      pages: [
-        {
-          header: {
-            description: strings.PropertyPaneDescription
-          },
-          groups: [
-            {
-              groupName: strings.BasicGroupName,
-              groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
-                })
-              ]
-            }
-          ]
-        }
-      ]
-    };
   }
 }
